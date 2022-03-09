@@ -1,12 +1,64 @@
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import ListView
+from django.views.generic import DetailView
+from django.views.generic import CreateView
+from django.views.generic import UpdateView
+from django.views.generic import DeleteView
 from .models import Post
 
 
-def home(request):
-    context = {
-            'posts': Post.objects.all()
-            }
-    return render(request, 'blog/home.html', context)
+class PostListView(ListView):
+    # this is the object that iterates on this model
+    model = Post
+    # normally ListView classes look for
+    # <app>/<model>_<viewtype>.html
+    # but we already created the html, so we say:
+    template_name = 'blog/home.html'
+    # and in that view, the class needs to iterate over this var
+    context_object_name = 'posts'
+    # Ordering attribute Reversed date_posted
+    ordering = ['-date_posted']
+
+
+class PostDetailView(DetailView):
+    model = Post
+
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    success_url = '/'
+
+    def test_func(self):
+        post = self.get_object()
+        if self.request.user == post.author:
+            return True
+        return False
+
+
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'content']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    fields = ['title', 'content']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+    
+    def test_func(self):
+        post = self.get_object()
+        if self.request.user == post.author:
+            return True
+        return False
 
 
 def about(request):

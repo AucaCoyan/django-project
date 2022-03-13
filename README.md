@@ -1,3 +1,3 @@
 # django-project
 
-![Alt text](http://raw.githubusercontent.com/AucaCoyan/django-project/blob/main/img/django-blog-capture.png)
+![Alt text](https://raw.githubusercontent.com/AucaCoyan/django-project/main/img/django-blog-capture.png)
